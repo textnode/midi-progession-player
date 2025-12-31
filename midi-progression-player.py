@@ -2,7 +2,7 @@
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# You may obtain a copy of the License at 
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -23,8 +23,6 @@ chromatic_loop = itertools.cycle(chromatic_notes)
 midi_notes = list(zip(range(128), chromatic_loop))
 
 major_intervals = [2,2,1,2,2,2,1]
-natural_minor_intervals = [2,1,2,2,1,2,2]
-
 
 def select_using_intervals(interval_input):
     selector = [1] #tonic
@@ -43,12 +41,6 @@ def flatten_midi_note(midi_note):
 def flatten_chromatic_note(note_to_flatten):
     reversed_chromatic_notes = reversed(chromatic_notes * 2)
     starting_point = itertools.dropwhile(lambda note: note != note_to_flatten, reversed_chromatic_notes)
-    next(starting_point)
-    return(next(starting_point))
-
-def sharpen_chromatic_note(note_to_sharpen):
-    forward_chromatic_notes = iter(chromatic_notes * 2)
-    starting_point = itertools.dropwhile(lambda note: note != note_to_sharpen, forward_chromatic_notes)
     next(starting_point)
     return(next(starting_point))
 
@@ -106,17 +98,13 @@ def add_notations_for(notations, root, degree_modifier):
     notation[degree_modifier + major_degrees[index] + 'm6'] = [root, chords['m6']]
     notation[degree_modifier + major_degrees[index] + 'm9'] = [root, chords['m9']]
 
+
 with mido.open_output('Gen', virtual=True) as outport:
-    user_data = input("Enter root and quality (e.g. C m) and press <Enter>...")
+    user_data = input("Enter root (e.g. C) and press <Enter>...")
     fields = user_data.split(' ')
 
     tonic = fields[0]
-
-    interval_data = fields[1]
     intervals = major_intervals
-    if interval_data == 'm':
-        intervals = natural_minor_intervals
-
     diatonic_scale = build_scale(intervals, tonic)
 
     print(diatonic_scale)
@@ -131,8 +119,6 @@ with mido.open_output('Gen', virtual=True) as outport:
         add_notations_for(notation, root, "")
         flattened = flatten_chromatic_note(root)
         add_notations_for(notation, flattened, "b")
-        sharpened = sharpen_chromatic_note(root)
-        add_notations_for(notation, sharpened, "#")
 
     pprint.pp(notation)
 
@@ -145,7 +131,7 @@ with mido.open_output('Gen', virtual=True) as outport:
         for chord in chords:
             [chord_tonic, notes] = notation[chord]
             notes_to_play = build_chord(chord_tonic, intervals, notes, 4)
-            print("%s %s, chord: %s notes:%s" % (tonic, interval_data, chord, notes_to_play))
+            print("%s %s, chord: %s notes:%s" % (tonic, intervals, chord, notes_to_play))
             for note_to_play in notes_to_play:
                 msg = mido.Message("note_on", note=note_to_play[0])
                 outport.send(msg)
@@ -153,5 +139,4 @@ with mido.open_output('Gen', virtual=True) as outport:
             for note_to_stop in notes_to_play:
                 msg = mido.Message("note_off", note=note_to_stop[0])
                 outport.send(msg)
-
 
