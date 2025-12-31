@@ -128,15 +128,17 @@ with mido.open_output('Gen', virtual=True) as outport:
         chords = response.split()
         print(chords)
 
-        for chord in chords:
-            [chord_tonic, notes] = notation[chord]
-            notes_to_play = build_chord(chord_tonic, intervals, notes, 4)
-            print("%s %s, chord: %s notes:%s" % (tonic, intervals, chord, notes_to_play))
-            for note_to_play in notes_to_play:
-                msg = mido.Message("note_on", note=note_to_play[0])
-                outport.send(msg)
-            more = input("stop")
-            for note_to_stop in notes_to_play:
-                msg = mido.Message("note_off", note=note_to_stop[0])
-                outport.send(msg)
+        while True:
+            for chord in chords:
+                [chord_tonic, notes] = notation[chord]
+                notes_to_play = build_chord(chord_tonic, intervals, notes, 4)
+                print("%s %s, chord: %s notes:%s" % (tonic, intervals, chord, notes_to_play))
+                for note_to_play in notes_to_play:
+                    msg = mido.Message("note_on", note=note_to_play[0])
+                    outport.send(msg)
+                time.sleep(2)
+                for note_to_stop in notes_to_play:
+                    msg = mido.Message("note_off", note=note_to_stop[0])
+                    outport.send(msg)
+                time.sleep(2)
 
