@@ -40,6 +40,11 @@ def flatten_midi_note(midi_note_to_flatten):
     next(starting_point)
     return(next(starting_point))
 
+def sharpen_midi_note(midi_note_to_sharpen):
+    starting_point = itertools.dropwhile(lambda note: note != midi_note_to_sharpen, midi_notes)
+    next(starting_point)
+    return(next(starting_point))
+
 def flatten_chromatic_note(chromatic_note_to_flatten):
     reversed_chromatic_notes = reversed(chromatic_notes * 2)
     starting_point = itertools.dropwhile(lambda note: note != chromatic_note_to_flatten, reversed_chromatic_notes)
@@ -68,13 +73,14 @@ def build_chord(tonic, intervals, notes, octave):
     for chord_note in notes:
         position = int(chord_note[-1])
         midi_note = (diatonic_notes[position-1])
-        if chord_note[0] != 'b':
-           notes_to_play.append(midi_note)
-        else:
+        if chord_note[0] == 'b':
            notes_to_play.append(flatten_midi_note(midi_note))
+        elif chord_note[0] == '#':
+           notes_to_play.append(sharpen_midi_note(midi_note))
+        else:
+           notes_to_play.append(midi_note)
 
     return notes_to_play
-
 
 def play_chord(port, tonic, intervals, chord):
     [chord_tonic, notes] = notation[chord]
@@ -95,20 +101,24 @@ def add_notations_for(notations, root, degree_modifier):
     dom7 = ['1','3','5','b7']
     maj7 = ['1','3','5','7']
     maj9 = ['1','3','5','7','9']
+    aug = ['1', '3', '#5']
+    aug7 = ['1', '3', '#5', '7']
 
     minor = ['1','b3','5']
     min6 = ['1','b3','5','6']
     min7 = ['1','b3','5','b7']
-    min9 = ['1','b3','5','b7', '9']
+    min9 = ['1','b3','5','b7','9']
 
     sus2 = ['1','2','5']
     sus4 = ['1','4','5']
-    
+
     notation[degree_modifier + major_degrees[index]] = [root, major]
     notation[degree_modifier + major_degrees[index] + '6'] = [root, maj6]
     notation[degree_modifier + major_degrees[index] + '7'] = [root, dom7]
     notation[degree_modifier + major_degrees[index] + 'M7'] = [root, maj7]
     notation[degree_modifier + major_degrees[index] + '9'] = [root, maj9]
+    notation[degree_modifier + major_degrees[index] + '+'] = [root, aug]
+    notation[degree_modifier + major_degrees[index] + '+7'] = [root, aug7]
 
     notation[degree_modifier + minor_degrees[index]] = [root, minor]
     notation[degree_modifier + minor_degrees[index] + '6'] = [root, min6]
@@ -120,7 +130,6 @@ def add_notations_for(notations, root, degree_modifier):
 
     notation[degree_modifier + major_degrees[index] + 'sus4'] = [root, sus4]
     notation[degree_modifier + minor_degrees[index] + 'sus4'] = [root, sus4]
-
 
 with mido.open_output('Gen', virtual=True) as outport:
     user_data = input("Enter root (e.g. C) and press <Enter>...")
@@ -180,6 +189,5 @@ with mido.open_output('Gen', virtual=True) as outport:
                 else:
                     for chord in canned[canned_index].split():
                         play_chord(outport, tonic, intervals, chord)
-
 
 
