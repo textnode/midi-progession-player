@@ -14,6 +14,7 @@
 
 import mido
 
+import time
 import pprint
 import itertools
 
@@ -33,16 +34,18 @@ def select_using_intervals(interval_input):
         selector.append(1)
     return selector
 
-def flatten_midi_note(midi_note):
+def flatten_midi_note(midi_note_to_flatten):
     reversed_midi_notes = reversed(midi_notes)
-    starting_point = itertools.dropwhile(lambda note: note != midi_note, reversed_midi_notes)
-    return(next(starting_point))
-
-def flatten_chromatic_note(note_to_flatten):
-    reversed_chromatic_notes = reversed(chromatic_notes * 2)
-    starting_point = itertools.dropwhile(lambda note: note != note_to_flatten, reversed_chromatic_notes)
+    starting_point = itertools.dropwhile(lambda note: note != midi_note_to_flatten, reversed_midi_notes)
     next(starting_point)
     return(next(starting_point))
+
+def flatten_chromatic_note(chromatic_note_to_flatten):
+    reversed_chromatic_notes = reversed(chromatic_notes * 2)
+    starting_point = itertools.dropwhile(lambda note: note != chromatic_note_to_flatten, reversed_chromatic_notes)
+    next(starting_point)
+    return(next(starting_point))
+
 
 
 def build_scale(intervals, tonic):
@@ -73,6 +76,19 @@ def build_chord(tonic, intervals, notes, octave):
     return notes_to_play
 
 
+def play_chord(port, tonic, intervals, chord):
+    [chord_tonic, notes] = notation[chord]
+    notes_to_play = build_chord(chord_tonic, intervals, notes, 4)
+    print("%s %s, chord: %s notes:%s" % (tonic, intervals, chord, notes_to_play))
+    for note_to_play in notes_to_play:
+        msg = mido.Message("note_on", note=note_to_play[0])
+        outport.send(msg)
+    time.sleep(2)
+    for note_to_stop in notes_to_play:
+        msg = mido.Message("note_off", note=note_to_stop[0])
+        outport.send(msg)
+    time.sleep(0.5)
+
 def add_notations_for(notations, root, degree_modifier):
     major = ['1','3','5']
     maj6 = ['1','3','5','6']
@@ -85,18 +101,16 @@ def add_notations_for(notations, root, degree_modifier):
     min7 = ['1','b3','5','b7']
     min9 = ['1','b3','5','b7', '9']
 
-    chords = {'M': major, 'M6': maj6, 'M7': maj7, 'M9': maj9, 'm': minor, 'm6': min6, 'm7': min7, 'm9': min9, '7': dom7}
+    notation[degree_modifier + major_degrees[index]] = [root, major]
+    notation[degree_modifier + major_degrees[index] + '6'] = [root, maj6]
+    notation[degree_modifier + major_degrees[index] + '7'] = [root, dom7]
+    notation[degree_modifier + major_degrees[index] + 'M7'] = [root, maj7]
+    notation[degree_modifier + major_degrees[index] + '9'] = [root, maj9]
 
-    notation[degree_modifier + major_degrees[index]] = [root, chords['M']]
-    notation[degree_modifier + major_degrees[index] + '6'] = [root, chords['M6']]
-    notation[degree_modifier + major_degrees[index] + '7'] = [root, chords['7']]
-    notation[degree_modifier + major_degrees[index] + 'M7'] = [root, chords['M7']]
-    notation[degree_modifier + major_degrees[index] + 'm7'] = [root, chords['m7']]
-    notation[degree_modifier + major_degrees[index] + '9'] = [root, chords['M9']]
-
-    notation[degree_modifier + minor_degrees[index]] = [root, chords['m']]
-    notation[degree_modifier + major_degrees[index] + 'm6'] = [root, chords['m6']]
-    notation[degree_modifier + major_degrees[index] + 'm9'] = [root, chords['m9']]
+    notation[degree_modifier + minor_degrees[index]] = [root, minor]
+    notation[degree_modifier + minor_degrees[index] + '6'] = [root, min6]
+    notation[degree_modifier + minor_degrees[index] + '7'] = [root, min7]
+    notation[degree_modifier + minor_degrees[index] + '9'] = [root, min9]
 
 
 with mido.open_output('Gen', virtual=True) as outport:
@@ -104,6 +118,7 @@ with mido.open_output('Gen', virtual=True) as outport:
     fields = user_data.split(' ')
 
     tonic = fields[0]
+
     intervals = major_intervals
     diatonic_scale = build_scale(intervals, tonic)
 
@@ -122,23 +137,40 @@ with mido.open_output('Gen', virtual=True) as outport:
 
     pprint.pp(notation)
 
+    canned = [
+"i bVII v bVI",
+"i bIII bVII IV",
+"I vi III IV",
+"bVI V i",
+"I IV bVII bVI I",
+"iv7 bVII7 I",
+"I I7 IV iv",
+"I ii vi IV",
+"I III IV iv",
+"I V vi IV",
+"vi IV I V",
+"i bVII bVI V",
+"i bIII IV bVI",
+"bVI bVII i i",
+"I III vi V IV iv",
+"I V vi IV"]
+
 
     while True:
-        response = input("Enter notation (e.g. ii) and press <Enter> to continue...")
-        chords = response.split()
-        print(chords)
+        response = input("Enter canned numbers and/or notation (e.g. ii) and press <Enter> to continue...")
+        choices = response.split()
+        print(choices)
 
         while True:
-            for chord in chords:
-                [chord_tonic, notes] = notation[chord]
-                notes_to_play = build_chord(chord_tonic, intervals, notes, 4)
-                print("%s %s, chord: %s notes:%s" % (tonic, intervals, chord, notes_to_play))
-                for note_to_play in notes_to_play:
-                    msg = mido.Message("note_on", note=note_to_play[0])
-                    outport.send(msg)
-                time.sleep(2)
-                for note_to_stop in notes_to_play:
-                    msg = mido.Message("note_off", note=note_to_stop[0])
-                    outport.send(msg)
-                time.sleep(2)
+            for choice in choices:
+                try:
+                    canned_index = int(choice)
+                except ValueError:
+                    chord = choice
+                    play_chord(outport, tonic, intervals, choice)
+                else:
+                    for chord in canned[canned_index].split():
+                        play_chord(outport, tonic, intervals, chord)
+
+
 
