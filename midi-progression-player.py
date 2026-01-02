@@ -101,6 +101,9 @@ def add_notations_for(notations, root, degree_modifier):
     min7 = ['1','b3','5','b7']
     min9 = ['1','b3','5','b7', '9']
 
+    sus2 = ['1','2','5']
+    sus4 = ['1','4','5']
+    
     notation[degree_modifier + major_degrees[index]] = [root, major]
     notation[degree_modifier + major_degrees[index] + '6'] = [root, maj6]
     notation[degree_modifier + major_degrees[index] + '7'] = [root, dom7]
@@ -111,6 +114,12 @@ def add_notations_for(notations, root, degree_modifier):
     notation[degree_modifier + minor_degrees[index] + '6'] = [root, min6]
     notation[degree_modifier + minor_degrees[index] + '7'] = [root, min7]
     notation[degree_modifier + minor_degrees[index] + '9'] = [root, min9]
+
+    notation[degree_modifier + major_degrees[index] + 'sus2'] = [root, sus2]
+    notation[degree_modifier + minor_degrees[index] + 'sus2'] = [root, sus2]
+
+    notation[degree_modifier + major_degrees[index] + 'sus4'] = [root, sus4]
+    notation[degree_modifier + minor_degrees[index] + 'sus4'] = [root, sus4]
 
 
 with mido.open_output('Gen', virtual=True) as outport:
