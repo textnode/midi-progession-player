@@ -11,11 +11,13 @@ When prompted for notation enter a space separate list of chord notations follow
 e.g. ii<Enter> for the Minor Second
 e.g. II<Enter> for the Major Second
 e.g. bIII<Enter> for the Flattened Major Third
-e.g. #V<Enter> for the Sharpened Major Fifth
 e.g. VI7<Enter> for the Major Sixth Dominant Seventh
-e.g. VIM7<Enter> for the Major Sixth Major Seventh
-e.g. VIm7<Enter> for the Major Sixth Minor Seventh
+e.g. VIM7<Enter> for the Major Sixth Seventh
+e.g. vi7<Enter> for the Minor Sixth Seventh
 
-I'll likely add Diminished, Sus 2 and Sus4 soon.
+Also: 
+IIsus2 or iisus2 for sus2 (not major or minor, express either way)
+IIsus4 or iisus4 for sus4 (not major or minor, express either way)
 
-Inversions may come at some point.
+II+ for Augmented
+II+7 for Augmented Seventh
