@@ -23,11 +23,12 @@ chromatic_loop = itertools.cycle(chromatic_notes)
 
 midi_notes = list(zip(range(128), chromatic_loop))
 
-major_intervals = [2,2,1,2,2,2,1]
+major_intervals = [2,2,1,2,2,2]
+minor_intervals = [2,1,2,2,1,2]
 
 def select_using_intervals(interval_input):
     selector = [1] #tonic
-    intervals = iter(itertools.chain(interval_input * 10))
+    intervals = iter(itertools.chain(interval_input))
     for interval in intervals:
         for i in range(interval-1):
             selector.append(0)
@@ -53,15 +54,16 @@ def flatten_chromatic_note(chromatic_note_to_flatten):
 
 
 
-def build_scale(intervals, tonic):
-    selector = select_using_intervals(intervals)
-    starting_point = itertools.dropwhile(lambda note: note != tonic, iter(chromatic_notes))
+def build_scale(interval_input, tonic):
+    selector = select_using_intervals(interval_input)
+    #starting_point = itertools.dropwhile(lambda note: note != tonic, iter(chromatic_notes*2))
+    starting_point = itertools.dropwhile(lambda note: note != tonic, chromatic_loop)
     diatonic_notes = list(itertools.compress(starting_point, selector))
     return diatonic_notes
 
 
-def build_chord(tonic, intervals, notes, octave):
-    selector = select_using_intervals(intervals)
+def build_chord(tonic, interval_input, notes, octave):
+    selector = select_using_intervals(interval_input)
     starting_point = itertools.dropwhile(lambda note: note[1] != tonic, iter(midi_notes))
     for i in range(octave):
         next(starting_point)
@@ -82,10 +84,12 @@ def build_chord(tonic, intervals, notes, octave):
 
     return notes_to_play
 
-def play_chord(port, tonic, intervals, chord):
+def play_chord(port, tonic, interval_input, chord):
     [chord_tonic, notes] = notation[chord]
-    notes_to_play = build_chord(chord_tonic, intervals, notes, 4)
-    print("%s %s, chord: %s notes:%s" % (tonic, intervals, chord, notes_to_play))
+    notes_to_play = build_chord(chord_tonic, interval_input, notes, 4)
+    print("%s %s, chord: %s notes:%s" % (tonic, interval_input, chord, notes_to_play))
+    print("Major scale: %s" % str(build_scale(major_intervals, chord_tonic)))
+    print("Minor scale: %s" % str(build_scale(minor_intervals, chord_tonic)))
     for note_to_play in notes_to_play:
         msg = mido.Message("note_on", note=note_to_play[0])
         outport.send(msg)
@@ -137,8 +141,7 @@ with mido.open_output('Gen', virtual=True) as outport:
 
     tonic = fields[0]
 
-    intervals = major_intervals
-    diatonic_scale = build_scale(intervals, tonic)
+    diatonic_scale = build_scale(major_intervals, tonic)
 
     print(diatonic_scale)
 
@@ -146,7 +149,6 @@ with mido.open_output('Gen', virtual=True) as outport:
 
     major_degrees = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
     minor_degrees = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
-
 
     for index, root in enumerate(diatonic_scale):
         add_notations_for(notation, root, "")
@@ -185,9 +187,9 @@ with mido.open_output('Gen', virtual=True) as outport:
                     canned_index = int(choice)
                 except ValueError:
                     chord = choice
-                    play_chord(outport, tonic, intervals, choice)
+                    play_chord(outport, tonic, major_intervals, choice)
                 else:
                     for chord in canned[canned_index].split():
-                        play_chord(outport, tonic, intervals, chord)
+                        play_chord(outport, tonic, major_intervals, chord)
 
 
