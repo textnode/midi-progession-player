@@ -16,8 +16,10 @@ Also:
 * e.g. IIsus2 or iisus2 for sus2 (not major or minor, express either way)
 * e.g. IIsus4 or iisus4 for sus4 (not major or minor, express either way)
 
-* e.g. II+ for Major Second Augmented
-* e.g. II+7 for Major Second Augmented Seventh
+* e.g. II+ for Second Augmented
+* e.g. II+7 for Second Augmented Seventh
+
+* e.g. iio for Second Diminished
 
 
 You can also mix in common progressions from a canned list I have included, by using the numbers 1 to 15.
