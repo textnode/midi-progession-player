@@ -1,4 +1,4 @@
-# Copyright 2025 Darren Elwood <darren@textnode.com> http://www.textnode.com @textnode
+# Copyright 2025-2026 Darren Elwood <darren@textnode.com> http://www.textnode.com @textnode
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,13 +56,12 @@ def flatten_chromatic_note(chromatic_note_to_flatten):
 
 def build_scale(interval_input, tonic):
     selector = select_using_intervals(interval_input)
-    #starting_point = itertools.dropwhile(lambda note: note != tonic, iter(chromatic_notes*2))
     starting_point = itertools.dropwhile(lambda note: note != tonic, chromatic_loop)
     diatonic_notes = list(itertools.compress(starting_point, selector))
     return diatonic_notes
 
 
-def build_chord(tonic, interval_input, notes, octave):
+def build_chord_from_tonic_and_octave(tonic, interval_input, notes, octave):
     selector = select_using_intervals(interval_input)
     starting_point = itertools.dropwhile(lambda note: note[1] != tonic, iter(midi_notes))
     for i in range(octave):
@@ -86,7 +85,7 @@ def build_chord(tonic, interval_input, notes, octave):
 
 def play_chord(port, tonic, interval_input, chord):
     [chord_tonic, notes] = notation[chord]
-    notes_to_play = build_chord(chord_tonic, interval_input, notes, 4)
+    notes_to_play = build_chord_from_tonic_and_octave(chord_tonic, interval_input, notes, 4)
     print("%s %s, chord: %s notes:%s" % (tonic, interval_input, chord, notes_to_play))
     print("Major scale: %s" % str(build_scale(major_intervals, chord_tonic)))
     print("Minor scale: %s" % str(build_scale(minor_intervals, chord_tonic)))
@@ -104,17 +103,15 @@ def add_notations_for(notations, root, degree_modifier):
     maj6 = ['1','3','5','6']
     dom7 = ['1','3','5','b7']
     maj7 = ['1','3','5','7']
-    maj9 = ['1','3','5','7','9']
     aug = ['1', '3', '#5']
     aug7 = ['1', '3', '#5', '7']
 
     minor = ['1','b3','5']
     min6 = ['1','b3','5','6']
     min7 = ['1','b3','5','b7']
-    min9 = ['1','b3','5','b7','9']
 
     dim = ['1','b3','b5']
-    
+
     sus2 = ['1','2','5']
     sus4 = ['1','4','5']
 
@@ -122,15 +119,13 @@ def add_notations_for(notations, root, degree_modifier):
     notation[degree_modifier + major_degrees[index] + '6'] = [root, maj6]
     notation[degree_modifier + major_degrees[index] + '7'] = [root, dom7]
     notation[degree_modifier + major_degrees[index] + 'M7'] = [root, maj7]
-    notation[degree_modifier + major_degrees[index] + '9'] = [root, maj9]
     notation[degree_modifier + major_degrees[index] + '+'] = [root, aug]
     notation[degree_modifier + major_degrees[index] + '+7'] = [root, aug7]
 
     notation[degree_modifier + minor_degrees[index]] = [root, minor]
     notation[degree_modifier + minor_degrees[index] + '6'] = [root, min6]
     notation[degree_modifier + minor_degrees[index] + '7'] = [root, min7]
-    notation[degree_modifier + minor_degrees[index] + '9'] = [root, min9]
-    notation[degree_modifier + minor_degrees[index] + 'o'] = [root, dim]    
+    notation[degree_modifier + minor_degrees[index] + 'o'] = [root, dim]
 
     notation[degree_modifier + major_degrees[index] + 'sus2'] = [root, sus2]
     notation[degree_modifier + minor_degrees[index] + 'sus2'] = [root, sus2]
@@ -152,6 +147,7 @@ with mido.open_output('Gen', virtual=True) as outport:
 
     major_degrees = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
     minor_degrees = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
+
 
     for index, root in enumerate(diatonic_scale):
         add_notations_for(notation, root, "")
@@ -194,5 +190,6 @@ with mido.open_output('Gen', virtual=True) as outport:
                 else:
                     for chord in canned[canned_index].split():
                         play_chord(outport, tonic, major_intervals, chord)
+
 
 
