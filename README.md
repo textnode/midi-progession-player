@@ -4,7 +4,7 @@ Warning - This document is a Work In Progress
 
 Run the script and when prompted key in the tonic followed by &lt;Enter&gt;
 
-When prompted for notation enter a space separated list of chord notations followed by <Enter>
+When prompted for notation enter a space separated list of chord notations followed by &lt;Enter&gt;
 * e.g. ii&lt;Enter&gt; for the Minor Second
 * e.g. II&lt;Enter&gt; for the Major Second
 * e.g. bIII&lt;Enter&gt; for the Flattened Major Third
