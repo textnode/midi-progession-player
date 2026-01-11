@@ -2,25 +2,32 @@
 
 Warning - This document is a Work In Progress
 
-All parameters to the script are supplied on the commandline and are mandatory.
+Commandline structure:
+
+python3 midi-progression-player.py &lt;Tonic&gt; &lt;Octave&gt; &lt;BPM&gt; &lt;Count&gt; &lt;Pause&gt; &lt;OmitTonics&gt; &lt;Progression and/or Canned Progressions...&gt;
 
 Commandline example:
 
-python3 midi-progression-player.py C 3 60 4 0.1 0 bIII 7 vi7 12
+python3 midi-progression-player.py C 3 60 4 0.1 OT 0 bIII 7 vi7 12
 
 Gives you:
 
-Tonic C
+* Tonic C
 
-Octave 3
+* Octave 3
 
-BPM 60
+* BPM 60
 
-Count 4
+* Count 4 (number of times the chord is played within the beat)
 
-Pause 0.1 (seconds)
+* Pause 0.1 (time between chords being played) (seconds)
 
-...and will play canned progression 0, followed by flattened third, then canned progression 7, followed by minor sixth seventh, followed by canned progression 12.
+* Omits Tonics
+
+* ...and will play canned progression 0, followed by flattened third, then canned progression 7, followed by minor sixth seventh, followed by canned progression 12.
+
+"OT" (Omit Tonics) is the only optional parameter - include if you want to fill those in using another instrument.
+
 
 
 Progression Notation:
@@ -39,6 +46,3 @@ Also:
 * e.g. II+7 for Second Augmented Seventh
 
 * e.g. iio for Second Diminished
-
-
-This will play canned progression 0, followed by flattened third, then canned progression 7, followed by minor sixth seventh, followed by canned progression 12.
