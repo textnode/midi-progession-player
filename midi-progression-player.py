@@ -107,6 +107,7 @@ def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
     time.sleep(pause)
 
 def add_notations_for(notations, root, degree_modifier):
+    tonic_only = ['1']
     major = ['1','3','5']
     maj6 = ['1','3','5','6']
     dom7 = ['1','3','5','b7']
@@ -134,6 +135,9 @@ def add_notations_for(notations, root, degree_modifier):
     notation[degree_modifier + minor_degrees[index] + '6'] = [root, min6]
     notation[degree_modifier + minor_degrees[index] + '7'] = [root, min7]
     notation[degree_modifier + minor_degrees[index] + 'o'] = [root, dim]
+
+    notation[degree_modifier + major_degrees[index] + 'T'] = [root, tonic_only]
+    notation[degree_modifier + minor_degrees[index] + 'T'] = [root, tonic_only]
 
     notation[degree_modifier + major_degrees[index] + 'sus2'] = [root, sus2]
     notation[degree_modifier + minor_degrees[index] + 'sus2'] = [root, sus2]
@@ -201,5 +205,6 @@ with mido.open_output('Gen', virtual=True) as outport:
                 else:
                     for chord in canned[canned_index].split():
                         play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause)
+
 
 
