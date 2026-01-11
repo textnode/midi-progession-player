@@ -104,7 +104,6 @@ def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
             msg = mido.Message("note_off", note=note_to_stop[0])
             outport.send(msg)
         time.sleep(pause)
-    time.sleep(pause)
 
 def add_notations_for(notations, root, degree_modifier):
     tonic_only = ['1']
