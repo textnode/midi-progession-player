@@ -14,6 +14,7 @@
 
 import mido
 
+import sys
 import time
 import pprint
 import itertools
@@ -83,20 +84,27 @@ def build_chord_from_tonic_and_octave(tonic, interval_input, notes, octave):
 
     return notes_to_play
 
-def play_chord(port, tonic, interval_input, chord):
+def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
     [chord_tonic, notes] = notation[chord]
-    notes_to_play = build_chord_from_tonic_and_octave(chord_tonic, interval_input, notes, 4)
+    notes_to_play = build_chord_from_tonic_and_octave(chord_tonic, interval_input, notes, octave)
     print("%s %s, chord: %s notes:%s" % (tonic, interval_input, chord, notes_to_play))
     print("Major scale: %s" % str(build_scale(major_intervals, chord_tonic)))
     print("Minor scale: %s" % str(build_scale(minor_intervals, chord_tonic)))
-    for note_to_play in notes_to_play:
-        msg = mido.Message("note_on", note=note_to_play[0])
-        outport.send(msg)
-    time.sleep(2)
-    for note_to_stop in notes_to_play:
-        msg = mido.Message("note_off", note=note_to_stop[0])
-        outport.send(msg)
-    time.sleep(0.5)
+
+    bar = 60.0 - (pause * count)
+    measure = bar / bpm
+    duration = measure / count
+
+    for instance in range(count):
+        for note_to_play in notes_to_play:
+            msg = mido.Message("note_on", note=note_to_play[0])
+            outport.send(msg)
+        time.sleep(duration)
+        for note_to_stop in notes_to_play:
+            msg = mido.Message("note_off", note=note_to_stop[0])
+            outport.send(msg)
+        time.sleep(pause)
+    time.sleep(pause)
 
 def add_notations_for(notations, root, degree_modifier):
     major = ['1','3','5']
@@ -133,11 +141,15 @@ def add_notations_for(notations, root, degree_modifier):
     notation[degree_modifier + major_degrees[index] + 'sus4'] = [root, sus4]
     notation[degree_modifier + minor_degrees[index] + 'sus4'] = [root, sus4]
 
-with mido.open_output('Gen', virtual=True) as outport:
-    user_data = input("Enter root (e.g. C) and press <Enter>...")
-    fields = user_data.split(' ')
 
-    tonic = fields[0]
+
+
+with mido.open_output('Gen', virtual=True) as outport:
+    tonic = sys.argv[1]
+    octave = int(sys.argv[2])
+    bpm = int(sys.argv[3])
+    count = int(sys.argv[4])
+    pause = float(sys.argv[5])
 
     diatonic_scale = build_scale(major_intervals, tonic)
 
@@ -176,8 +188,7 @@ with mido.open_output('Gen', virtual=True) as outport:
 
 
     while True:
-        response = input("Enter canned numbers and/or notation (e.g. ii) and press <Enter> to continue...")
-        choices = response.split()
+        choices = sys.argv[6:]
         print(choices)
 
         while True:
@@ -186,10 +197,9 @@ with mido.open_output('Gen', virtual=True) as outport:
                     canned_index = int(choice)
                 except ValueError:
                     chord = choice
-                    play_chord(outport, tonic, major_intervals, choice)
+                    play_chord(outport, tonic, octave, major_intervals, choice, bpm, count, pause)
                 else:
                     for chord in canned[canned_index].split():
-                        play_chord(outport, tonic, major_intervals, chord)
-
+                        play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause)
 
 
