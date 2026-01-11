@@ -195,18 +195,31 @@ with mido.open_output('Gen', virtual=True) as outport:
 
     time.sleep(1) #give qpwgraph time to wire the output of this script to Yoshimi
 
-    while True:
+    choices = []
+    if sys.argv[6] == "OT":
+        print("Omit tonics")
+        for (key, value) in notation.items():
+            try:
+                #print("Value: %s" % (str(value)))
+                value[1].remove("1")
+                notation[key] = value
+            except ValueError:
+                pass
+        choices = sys.argv[7:]
+        pprint.pp(notation)
+    else:
+        print("Keep tonics")
         choices = sys.argv[6:]
         print(choices)
 
-        while True:
-            for choice in choices:
-                try:
-                    canned_index = int(choice)
-                except ValueError:
-                    chord = choice
-                    play_chord(outport, tonic, octave, major_intervals, choice, bpm, count, pause)
-                else:
-                    for chord in canned[canned_index].split():
-                        play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause)
+    while True:
+        for choice in choices:
+            try:
+                canned_index = int(choice)
+            except ValueError:
+                chord = choice
+                play_chord(outport, tonic, octave, major_intervals, choice, bpm, count, pause)
+            else:
+                for chord in canned[canned_index].split():
+                    play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause)
 
