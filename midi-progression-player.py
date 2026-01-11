@@ -85,6 +85,9 @@ def build_chord_from_tonic_and_octave(tonic, interval_input, notes, octave):
     return notes_to_play
 
 def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
+    local_args = locals()
+    print("play_chord: %s" % str(local_args))
+
     [chord_tonic, notes] = notation[chord]
     notes_to_play = build_chord_from_tonic_and_octave(chord_tonic, interval_input, notes, octave)
     print("%s %s, chord: %s notes:%s" % (tonic, interval_input, chord, notes_to_play))
@@ -172,23 +175,25 @@ with mido.open_output('Gen', virtual=True) as outport:
     pprint.pp(notation)
 
     canned = [
-"i bVII v bVI",
 "i bIII bVII IV",
-"I vi III IV",
-"bVI V i",
-"I IV bVII bVI I",
-"iv7 bVII7 I",
-"I I7 IV iv",
 "I ii vi IV",
+"i bVII v bVI",
+"I vi III IV",
+"I IV bVII bVI I",
+"I I7 IV iv",
 "I III IV iv",
 "I V vi IV",
 "vi IV I V",
 "i bVII bVI V",
 "i bIII IV bVI",
-"bVI bVII i i",
 "I III vi V IV iv",
-"I V vi IV"]
+"I V vi IV",
+"bVI bVII i i",
+"iv7 bVII7 I",
+"bVI V i"]
 
+
+    time.sleep(1) #give qpwgraph time to wire the output of this script to Yoshimi
 
     while True:
         choices = sys.argv[6:]
@@ -204,6 +209,4 @@ with mido.open_output('Gen', virtual=True) as outport:
                 else:
                     for chord in canned[canned_index].split():
                         play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause)
-
-
 
