@@ -8,7 +8,7 @@ python3 midi-progression-player.py &lt;Tonic&gt; &lt;Octave&gt; &lt;BPM&gt; &lt;
 
 Commandline example:
 
-python3 midi-progression-player.py C 3 60 4 0.1 OT 0 bIII 7 vi7 12
+python3 midi-progression-player.py C 3 60 4 50 OT 0 bIII 7 vi7 12
 
 Gives you:
 
@@ -20,7 +20,7 @@ Gives you:
 
 * Count 4 (number of times the chord is played within the beat)
 
-* Pause 0.1 (time between chords being played) (seconds)
+* Pause 50 (percentage of the measure in which chord is being played)
 
 * Omits Tonics
 
@@ -46,3 +46,5 @@ Also:
 * e.g. II+7 for Second Augmented Seventh
 
 * e.g. iio for Second Diminished
+
+* e.g. iiT for where you ONLY want the Tonic played
