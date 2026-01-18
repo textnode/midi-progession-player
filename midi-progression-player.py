@@ -84,7 +84,7 @@ def build_chord_from_tonic_and_octave(tonic, interval_input, notes, octave):
 
     return notes_to_play
 
-def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
+def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause_pct):
     local_args = locals()
     print("play_chord: %s" % str(local_args))
 
@@ -94,9 +94,10 @@ def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
     print("Major scale: %s" % str(build_scale(major_intervals, chord_tonic)))
     print("Minor scale: %s" % str(build_scale(minor_intervals, chord_tonic)))
 
-    bar = 60.0 - (pause * count)
+    bar = 60.0
     measure = bar / bpm
-    duration = measure / count
+    duration = (measure / count) * ((100 - pause_pct) / 100)
+    rest = (measure / count) - duration
 
     for instance in range(count):
         for note_to_play in notes_to_play:
@@ -106,7 +107,7 @@ def play_chord(port, tonic, octave, interval_input, chord, bpm, count, pause):
         for note_to_stop in notes_to_play:
             msg = mido.Message("note_off", note=note_to_stop[0])
             outport.send(msg)
-        time.sleep(pause)
+        time.sleep(rest)
 
 def add_notations_for(notations, root, degree_modifier):
     tonic_only = ['1']
@@ -148,14 +149,12 @@ def add_notations_for(notations, root, degree_modifier):
     notation[degree_modifier + minor_degrees[index] + 'sus4'] = [root, sus4]
 
 
-
-
 with mido.open_output('Gen', virtual=True) as outport:
     tonic = sys.argv[1]
     octave = int(sys.argv[2])
     bpm = int(sys.argv[3])
     count = int(sys.argv[4])
-    pause = float(sys.argv[5])
+    pause_pct = float(sys.argv[5])
 
     diatonic_scale = build_scale(major_intervals, tonic)
 
@@ -193,8 +192,6 @@ with mido.open_output('Gen', virtual=True) as outport:
 "bVI V i"]
 
 
-    time.sleep(1) #give qpwgraph time to wire the output of this script to Yoshimi
-
     choices = []
     if sys.argv[6] == "OT":
         print("Omit tonics")
@@ -218,8 +215,8 @@ with mido.open_output('Gen', virtual=True) as outport:
                 canned_index = int(choice)
             except ValueError:
                 chord = choice
-                play_chord(outport, tonic, octave, major_intervals, choice, bpm, count, pause)
+                play_chord(outport, tonic, octave, major_intervals, choice, bpm, count, pause_pct)
             else:
                 for chord in canned[canned_index].split():
-                    play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause)
+                    play_chord(outport, tonic, octave, major_intervals, chord, bpm, count, pause_pct)
 
